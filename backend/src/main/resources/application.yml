@@ -1,0 +1,7 @@
+server:
+  port: 8080
+
+silicon:
+  api:
+    key: ${SILICON_API_KEY:sk-ffzpunutxfeipjuhabhlqhwfngabcqrcqowgxacnjkknttqm}
+    url: ${SILICON_API_URL:https://api.siliconflow.cn/v1/chat/completions}

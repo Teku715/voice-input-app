@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>语音输入法</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 24px;
+        }
+        
+        .text-area {
+            width: 100%;
+            height: 150px;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            padding: 15px;
+            font-size: 16px;
+            resize: none;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        .text-area:focus {
+            border-color: #667eea;
+        }
+        
+        .mic-btn {
+            display: block;
+            margin: 30px auto 20px;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .mic-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5);
+        }
+        
+        .mic-btn.recording {
+            animation: pulse 1s infinite;
+            background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .status {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 20px;
+            min-height: 20px;
+        }
+        
+        .status.recording {
+            color: #f5576c;
+            font-weight: bold;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .btn {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        
+        .btn:hover {
+            opacity: 0.8;
+        }
+        
+        .btn-copy {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-clear {
+            background: #e0e0e0;
+            color: #333;
+        }
+        
+        .btn-ai {
+            background: #764ba2;
+            color: white;
+        }
+        
+        .info {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎤 语音输入法</h1>
+        
+        <textarea class="text-area" id="result" placeholder="按下方按钮开始说话..."></textarea>
+        
+        <button class="mic-btn" id="micBtn" title="按住说话">🎤</button>
+        
+        <div class="status" id="status">准备就绪，点击按钮开始说话</div>
+        
+        <div class="actions">
+            <button class="btn btn-copy" onclick="copyText()">复制</button>
+            <button class="btn btn-clear" onclick="clearText()">清空</button>
+            <button class="btn btn-ai" onclick="improveWithAI()">AI优化</button>
+        </div>
+        
+        <div class="info" id="info">识别引擎: Web Speech API</div>
+    </div>
+
+    <script>
+        const micBtn = document.getElementById('micBtn');
+        const result = document.getElementById('result');
+        const status = document.getElementById('status');
+        const info = document.getElementById('info');
+        
+        let recognition = null;
+        let isRecording = false;
+        
+        // 检查浏览器支持
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = true;
+            recognition.lang = 'zh-CN';
+            
+            recognition.onstart = () => {
+                isRecording = true;
+                micBtn.classList.add('recording');
+                status.textContent = '🎙️ 正在录音...';
+                status.classList.add('recording');
+            };
+            
+            recognition.onresult = (event) => {
+                let finalTranscript = '';
+                let interimTranscript = '';
+                
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        finalTranscript += transcript;
+                    } else {
+                        interimTranscript += transcript;
+                    }
+                }
+                
+                result.value = finalTranscript || interimTranscript;
+            };
+            
+            recognition.onend = () => {
+                isRecording = false;
+                micBtn.classList.remove('recording');
+                status.textContent = '识别完成';
+                status.classList.remove('recording');
+            };
+            
+            recognition.onerror = (event) => {
+                status.textContent = '识别出错: ' + event.error;
+                micBtn.classList.remove('recording');
+            };
+        } else {
+            status.textContent = '您的浏览器不支持语音识别';
+            micBtn.disabled = true;
+        }
+        
+        // 按住说话
+        micBtn.addEventListener('mousedown', () => {
+            if (recognition && !isRecording) {
+                recognition.start();
+            }
+        });
+        
+        micBtn.addEventListener('mouseup', () => {
+            if (recognition && isRecording) {
+                recognition.stop();
+            }
+        });
+        
+        micBtn.addEventListener('mouseleave', () => {
+            if (recognition && isRecording) {
+                recognition.stop();
+            }
+        });
+        
+        // 触摸支持
+        micBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (recognition && !isRecording) {
+                recognition.start();
+            }
+        });
+        
+        micBtn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            if (recognition && isRecording) {
+                recognition.stop();
+            }
+        });
+        
+        function copyText() {
+            if (result.value) {
+                navigator.clipboard.writeText(result.value);
+                status.textContent = '✓ 已复制';
+                setTimeout(() => {
+                    status.textContent = '准备就绪';
+                }, 1500);
+            }
+        }
+        
+        function clearText() {
+            result.value = '';
+            status.textContent = '已清空';
+            setTimeout(() => {
+                status.textContent = '准备就绪';
+            }, 1500);
+        }
+        
+        function improveWithAI() {
+            if (!result.value.trim()) {
+                status.textContent = '请先输入文字';
+                return;
+            }
+            status.textContent = 'AI优化功能需要后端支持';
+        }
+    </script>
+</body>
+</html>
