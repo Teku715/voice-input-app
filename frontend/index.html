@@ -263,12 +263,24 @@
             }, 1500);
         }
         
-        function improveWithAI() {
+        async function improveWithAI() {
             if (!result.value.trim()) {
                 status.textContent = '请先输入文字';
                 return;
             }
-            status.textContent = 'AI优化功能需要后端支持';
+            status.textContent = '🤖 AI处理中...';
+            try {
+                const response = await fetch('http://localhost:8080/api/improve', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: result.value })
+                });
+                const data = await response.json();
+                result.value = data.result || data.error || '优化失败';
+                status.textContent = '✨ AI优化完成';
+            } catch (e) {
+                status.textContent = '请求失败: ' + e.message;
+            }
         }
     </script>
 </body>
