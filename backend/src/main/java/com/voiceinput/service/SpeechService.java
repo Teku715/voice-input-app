@@ -3,9 +3,7 @@ package com.voiceinput.service;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.*;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import java.util.Base64;
-import java.util.Map;
 
 @Service
 public class SpeechService {
@@ -15,33 +13,32 @@ public class SpeechService {
 
     private String cachedToken = null;
     private long tokenExpireTime = 0;
-
     private final RestTemplate restTemplate;
 
     public SpeechService() {
-        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
-        factory.setConnectTimeout(5000);
-        factory.setReadTimeout(10000);
-        this.restTemplate = new RestTemplate(factory);
+        this.restTemplate = new RestTemplate();
     }
 
-    public String recognize(byte[] audioBytes) throws Exception {
+    public String recognize(byte[] audioBytes, String format) throws Exception {
         String token = getAccessToken();
         if (token == null) {
-            throw new Exception("无法获取百度token");
+            throw new Exception("无法获取token");
         }
 
-        String url = "https://vop.baidu.com/server_api?token=" + token + "&cuid=voiceinput";
+        String url = "https://vop.baidu.com/server_api?token=" + token;
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         String base64Audio = Base64.getEncoder().encodeToString(audioBytes);
-        int speechLen = audioBytes.length;
+
+        // 百度支持的格式: pcm, wav, aiff, amr, mmf, ogg, m4a
+        // format 必须是百度支持的格式之一
+        String baiduFormat = "ogg".equals(format) ? "ogg" : "wav";
 
         String jsonBody = String.format(
-            "{\"speech\":\"%s\",\"len\":%d,\"format\":\"wav\",\"rate\":16000,\"channel\":1,\"dev_pid\":1537,\"cuid\":\"voiceinput\"}",
-            base64Audio, speechLen
+            "{\"speech\":\"%s\",\"len\":%d,\"format\":\"%s\",\"rate\":16000,\"channel\":1,\"cuid\":\"voiceinput\",\"dev_pid\":1537}",
+            base64Audio, audioBytes.length, baiduFormat
         );
 
         HttpEntity<String> entity = new HttpEntity<>(jsonBody, headers);
@@ -59,14 +56,14 @@ public class SpeechService {
                 + "&client_id=" + API_KEY
                 + "&client_secret=" + SECRET_KEY;
 
-        ResponseEntity<Map> response = restTemplate.getForEntity(tokenUrl, Map.class);
-        if (response.getBody() != null && response.getBody().containsKey("access_token")) {
-            cachedToken = response.getBody().get("access_token").toString();
-            int expiresIn = (int) response.getBody().getOrDefault("expires_in", 0);
-            tokenExpireTime = System.currentTimeMillis() + expiresIn * 1000;
+        ResponseEntity<String> response = restTemplate.getForEntity(tokenUrl, String.class);
+        if (response.getBody() != null && response.getBody().contains("access_token")) {
+            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            com.fasterxml.jackson.databind.JsonNode node = mapper.readTree(response.getBody());
+            cachedToken = node.get("access_token").asText();
+            tokenExpireTime = System.currentTimeMillis() + node.get("expires_in").asLong() * 1000;
             return cachedToken;
         }
-
         return null;
     }
 }

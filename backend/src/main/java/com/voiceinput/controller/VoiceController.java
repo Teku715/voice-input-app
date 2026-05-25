@@ -39,6 +39,7 @@ public class VoiceController {
     @PostMapping("/recognize")
     public Map<String, String> recognize(@RequestBody Map<String, String> request) {
         String audioBase64 = request.get("audio");
+        String format = request.getOrDefault("format", "wav");
         if (audioBase64 == null || audioBase64.trim().isEmpty()) {
             Map<String, String> error = new HashMap<>();
             error.put("result", "请录音");
@@ -47,7 +48,7 @@ public class VoiceController {
 
         try {
             byte[] audioBytes = Base64.getDecoder().decode(audioBase64);
-            String response = speechService.recognize(audioBytes);
+            String response = speechService.recognize(audioBytes, format);
             // 解析百度返回结果
             com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
             Map map = mapper.readValue(response, Map.class);

@@ -5,154 +5,59 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>语音输入法</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex; align-items: center; justify-content: center;
         }
-        
         .container {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            width: 90%;
-            max-width: 500px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            background: white; border-radius: 20px; padding: 40px;
+            width: 90%; max-width: 500px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
-        
-        h1 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 30px;
-            font-size: 24px;
-        }
-        
+        h1 { text-align: center; color: #333; margin-bottom: 30px; font-size: 24px; }
         .text-area {
-            width: 100%;
-            height: 150px;
-            border: 2px solid #ddd;
-            border-radius: 12px;
-            padding: 15px;
-            font-size: 16px;
-            resize: none;
-            outline: none;
-            transition: border-color 0.3s;
+            width: 100%; height: 150px; border: 2px solid #ddd;
+            border-radius: 12px; padding: 15px; font-size: 16px; resize: none; outline: none;
         }
-        
-        .text-area:focus {
-            border-color: #667eea;
-        }
-        
+        .text-area:focus { border-color: #667eea; }
         .mic-btn {
-            display: block;
-            margin: 30px auto 20px;
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            border: none;
+            display: block; margin: 30px auto 20px;
+            width: 80px; height: 80px; border-radius: 50%; border: none;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            font-size: 28px;
-            cursor: pointer;
+            color: white; font-size: 28px; cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
         }
-        
-        .mic-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5);
-        }
-        
-        .mic-btn.recording {
-            animation: pulse 1s infinite;
-            background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
-        }
-        
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-        
-        .status {
-            text-align: center;
-            color: #666;
-            font-size: 14px;
-            margin-bottom: 20px;
-            min-height: 20px;
-        }
-        
-        .status.recording {
-            color: #f5576c;
-            font-weight: bold;
-        }
-        
-        .actions {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-        }
-        
+        .mic-btn:hover { transform: scale(1.05); box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5); }
+        .mic-btn.recording { animation: pulse 1s infinite; background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%); }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        .status { text-align: center; color: #666; font-size: 14px; margin-bottom: 20px; min-height: 20px; }
+        .status.recording { color: #f5576c; font-weight: bold; }
+        .actions { display: flex; gap: 10px; justify-content: center; }
         .btn {
-            padding: 10px 25px;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: opacity 0.2s;
+            padding: 10px 25px; border: none; border-radius: 8px;
+            font-size: 14px; cursor: pointer; transition: opacity 0.2s;
         }
-        
-        .btn:hover {
-            opacity: 0.8;
-        }
-        
-        .btn-copy {
-            background: #667eea;
-            color: white;
-        }
-        
-        .btn-clear {
-            background: #e0e0e0;
-            color: #333;
-        }
-        
-        .btn-ai {
-            background: #764ba2;
-            color: white;
-        }
-        
-        .info {
-            text-align: center;
-            margin-top: 20px;
-            font-size: 12px;
-            color: #999;
-        }
+        .btn:hover { opacity: 0.8; }
+        .btn-copy { background: #667eea; color: white; }
+        .btn-clear { background: #e0e0e0; color: #333; }
+        .btn-ai { background: #764ba2; color: white; }
+        .info { text-align: center; margin-top: 20px; font-size: 12px; color: #999; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎤 语音输入法</h1>
-        
-        <textarea class="text-area" id="result" placeholder="按住按钮开始说话..."></textarea>
-        
-        <button class="mic-btn" id="micBtn" title="按住说话">🎤</button>
-        
-        <div class="status" id="status">准备就绪，点击按钮开始说话</div>
-        
+        <h1>ð» 语音输入法</h1>
+        <textarea class="text-area" id="result" placeholder="ç³»æŒ‰æŒ¬éžæŒ‰é'±å¼€å§‹è¯´è¯�..."></textarea>
+        <button class="mic-btn" id="micBtn" title="ç³»æŒ‰è¯´è¯">ð«</button>
+        <div class="status" id="status">å‡†å¤‡å°±ç»ªï¼Œç‚¹å‡»æŒ¬é'±å¼€å§‹è¯´è¯±</div>
         <div class="actions">
-            <button class="btn btn-copy" onclick="copyText()">复制</button>
-            <button class="btn btn-clear" onclick="clearText()">清空</button>
-            <button class="btn btn-ai" onclick="improveWithAI()">AI优化</button>
+            <button class="btn btn-copy" onclick="copyText()">å¤夏å®Œ</button>
+            <button class="btn btn-clear" onclick="clearText()">æ¸…ç©º</button>
+            <button class="btn btn-ai" onclick="improveWithAI()">AIä¼˜åŒ–</button>
         </div>
-        
-        <div class="info" id="info">识别引擎: 百度语音识别API</div>
+        <div class="info" id="info">è¯†åˆ«å¼•æ“Ž: ç™¾åº¦è¯­éŸ³è¯†åˆ«API</div>
     </div>
 
     <script>
@@ -160,149 +65,87 @@
         const result = document.getElementById('result');
         const status = document.getElementById('status');
         const info = document.getElementById('info');
-        
         const API_BASE = 'http://localhost:8080';
-        
         let isRecording = false;
         let mediaRecorder = null;
         let audioChunks = [];
-        
+
         async function startRecording() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 audioChunks = [];
-                
-                // 优先使用PCM格式
-                let mimeType = 'audio/pcm';
-                if (!MediaRecorder.isTypeSupported(mimeType)) {
-                    mimeType = 'audio/webm;codecs=pcm';
-                }
+                // 优先使用ogg格式（百度支持）
+                let mimeType = 'audio/ogg';
                 if (!MediaRecorder.isTypeSupported(mimeType)) {
                     mimeType = 'audio/webm';
                 }
-                
                 mediaRecorder = new MediaRecorder(stream, { mimeType: mimeType });
-
-                mediaRecorder.ondataavailable = async (e) => {
-                    if (e.data.size > 0) {
-                        audioChunks.push(e.data);
-                    }
-                };
-                
+                mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
                 mediaRecorder.onstop = async () => {
-                    const audioBlob = new Blob(audioChunks, { type: 'audio/pcm' });
+                    const audioBlob = new Blob(audioChunks, { type: mimeType });
                     const arrayBuffer = await audioBlob.arrayBuffer();
-                    
-                    // 转换成UInt8Array然后转base64
-                    const uint8Array = new Uint8Array(arrayBuffer);
+                    const uint8 = new Uint8Array(arrayBuffer);
                     let binary = '';
-                    for (let i = 0; i < uint8Array.byteLength; i++) {
-                        binary += String.fromCharCode(uint8Array[i]);
-                    }
+                    for (let i = 0; i < uint8.byteLength; i++) binary += String.fromCharCode(uint8[i]);
                     const base64Audio = btoa(binary);
-                    
-                    await sendToBackend(base64Audio);
+                    await sendToBackend(base64Audio, mimeType);
                 };
-                
                 mediaRecorder.start();
                 isRecording = true;
                 micBtn.classList.add('recording');
-                status.textContent = '🔴 正在录音...';
+                status.textContent = 'ç·šä¸­...';
                 status.classList.add('recording');
-            } catch (err) {
-                status.textContent = '录音失败: ' + err.message;
-            }
+            } catch (err) { status.textContent = 'å½±åƒå•å¤±è´¥: ' + err.message; }
         }
-        
+
         function stopRecording() {
             if (mediaRecorder && isRecording) {
                 mediaRecorder.stop();
                 isRecording = false;
                 micBtn.classList.remove('recording');
-                status.textContent = '识别中...';
+                status.textContent = 'è¯†åˆ«ä¸­...';
                 status.classList.remove('recording');
             }
         }
-        
-        async function sendToBackend(base64Audio) {
+
+        async function sendToBackend(base64Audio, mimeType) {
             try {
+                const format = mimeType.includes('ogg') ? 'ogg' : 'webm';
                 const response = await fetch(API_BASE + '/api/recognize', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ audio: base64Audio })
+                    body: JSON.stringify({ audio: base64Audio, format: format })
                 });
                 const data = await response.json();
-                if (data.result) {
-                    result.value = data.result;
-                    status.textContent = '✓ 识别完成';
-                } else {
-                    status.textContent = '识别失败，请重试';
-                }
-            } catch (e) {
-                status.textContent = '请求出错: ' + e.message;
-            }
+                result.value = data.result || data.error || 'è¯†åˆ«å¤±è´¥';
+                status.textContent = data.result ? 'å®Œæˆ' : 'å¤±è´¥';
+            } catch (e) { status.textContent = 'è¯·æ±‚å¤±è´¥: ' + e.message; }
         }
-        
-        micBtn.addEventListener('mousedown', () => {
-            startRecording();
-        });
-        
-        micBtn.addEventListener('mouseup', () => {
-            stopRecording();
-        });
-        
-        micBtn.addEventListener('mouseleave', () => {
-            if (isRecording) stopRecording();
-        });
-        
-        micBtn.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            startRecording();
-        });
-        
-        micBtn.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            stopRecording();
-        });
-        
-        info.textContent = '识别引擎: 百度语音识别API';
-        
+
+        micBtn.addEventListener('mousedown', () => startRecording());
+        micBtn.addEventListener('mouseup', () => stopRecording());
+        micBtn.addEventListener('mouseleave', () => { if (isRecording) stopRecording(); });
+        micBtn.addEventListener('touchstart', e => { e.preventDefault(); startRecording(); });
+        micBtn.addEventListener('touchend', e => { e.preventDefault(); stopRecording(); });
+        info.textContent = 'è¯†åˆ«å¼•æ“Ž: ç™¾åº¦è¯­éŸ³è¯†åˆ«API';
+
         function copyText() {
-            if (result.value) {
-                navigator.clipboard.writeText(result.value);
-                status.textContent = '✓ 已复制';
-                setTimeout(() => {
-                    status.textContent = '准备就绪';
-                }, 1500);
-            }
+            if (result.value) { navigator.clipboard.writeText(result.value); status.textContent = 'å·²å¤åˆ¶'; }
         }
-        
-        function clearText() {
-            result.value = '';
-            status.textContent = '已清空';
-            setTimeout(() => {
-                status.textContent = '准备就绪';
-            }, 1500);
-        }
-        
+        function clearText() { result.value = ''; status.textContent = 'å·²æ¸…ç©º'; }
         async function improveWithAI() {
-            if (!result.value.trim()) {
-                status.textContent = '请先输入文字';
-                return;
-            }
-            status.textContent = '🤖 AI处理中...';
+            if (!result.value.trim()) { status.textContent = 'è¯·å…光å…ˆè¾“å…¥æ–‡å­—'; return; }
+            status.textContent = 'AIå¤„ç†ä¸­...';
             try {
-                const response = await fetch(API_BASE + '/api/improve', {
+                const resp = await fetch(API_BASE + '/api/improve', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ text: result.value })
                 });
-                const data = await response.json();
-                result.value = data.result || data.error || '优化失败';
-                status.textContent = '✓ AI优化完成';
-            } catch (e) {
-                status.textContent = '请求失败: ' + e.message;
-            }
+                const data = await resp.json();
+                result.value = data.result || 'ä¼˜åŒ–å¤±è´¥';
+                status.textContent = 'AIå®Œæˆ';
+            } catch (e) { status.textContent = 'AIå¤±è´¥: ' + e.message; }
         }
     </script>
 </body>
