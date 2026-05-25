@@ -49,22 +49,29 @@ public class VoiceController {
         try {
             byte[] audioBytes = Base64.getDecoder().decode(audioBase64);
             String response = speechService.recognize(audioBytes, format);
-            // 解析百度返回结果
+            
             com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
             Map map = mapper.readValue(response, Map.class);
-            int errNo = (int) map.getOrDefault("err_no", -1);
-            if (errNo == 0) {
-                Map resultMap = (Map) map.get("result");
-                String text = (String) resultMap.get("recognition_text");
+            
+            // 硅基流动格式：{"text":"..."}
+            Object textObj = map.get("text");
+            if (textObj != null) {
                 Map<String, String> result = new HashMap<>();
-                result.put("result", text);
+                result.put("result", textObj.toString());
                 return result;
-            } else {
-                String errMsg = map.getOrDefault("err_msg", "识别失败").toString();
+            }
+            
+            // 其他格式（备用）
+            Object errorObj = map.get("error");
+            if (errorObj != null) {
                 Map<String, String> error = new HashMap<>();
-                error.put("result", "识别失败: " + errMsg);
+                error.put("result", "识别失败: " + errorObj.toString());
                 return error;
             }
+            
+            Map<String, String> error = new HashMap<>();
+            error.put("result", "识别失败: 未知格式");
+            return error;
         } catch (Exception e) {
             Map<String, String> error = new HashMap<>();
             error.put("result", "识别失败: " + e.getMessage());

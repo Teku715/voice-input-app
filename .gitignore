@@ -1,0 +1,17 @@
+# API Keys - never commit
+application.yml
+
+# IDE
+.idea/
+*.iml
+
+# Build
+target/
+*.class
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
