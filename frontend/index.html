@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>璇煶杈撳叆娉?/title>
+    <title>语音输入法</title>
     <style>
         * {
             margin: 0;
@@ -138,21 +138,21 @@
 </head>
 <body>
     <div class="container">
-        <h1>馃帳 璇煶杈撳叆娉?/h1>
+        <h1>🎤 语音输入法</h1>
         
-        <textarea class="text-area" id="result" placeholder="鎸変笅鏂规寜閽紑濮嬭璇?.."></textarea>
+        <textarea class="text-area" id="result" placeholder="按住按钮开始说话..."></textarea>
         
-        <button class="mic-btn" id="micBtn" title="鎸変綇璇磋瘽">馃帳</button>
+        <button class="mic-btn" id="micBtn" title="按住说话">🎤</button>
         
-        <div class="status" id="status">鍑嗗灏辩华锛岀偣鍑绘寜閽紑濮嬭璇?/div>
+        <div class="status" id="status">准备就绪，点击按钮开始说话</div>
         
         <div class="actions">
-            <button class="btn btn-copy" onclick="copyText()">澶嶅埗</button>
-            <button class="btn btn-clear" onclick="clearText()">娓呯┖</button>
-            <button class="btn btn-ai" onclick="improveWithAI()">AI浼樺寲</button>
+            <button class="btn btn-copy" onclick="copyText()">复制</button>
+            <button class="btn btn-clear" onclick="clearText()">清空</button>
+            <button class="btn btn-ai" onclick="improveWithAI()">AI优化</button>
         </div>
         
-        <div class="info" id="info">璇嗗埆寮曟搸: Web Speech API</div>
+        <div class="info" id="info">识别引擎: 百度语音识别API</div>
     </div>
 
     <script>
@@ -161,44 +161,28 @@
         const status = document.getElementById('status');
         const info = document.getElementById('info');
         
-        // ========== 璁璇煶璇嗗埆 ==========
-        const XUNFEI_APP_ID = '7780512';
-        const XUNFEI_API_KEY = 'HPKPOKEY0KKJzupj7Nx0N9Di';
-        const XUNFEI_API_SECRET = 'hr9XWQfoeA6sB2x5uGkGdxcgsemKL7Xg';
         const API_BASE = 'http://localhost:8080';
         
-        // HMAC-SHA1 绛惧悕
-        async function hmacSha1(secret, data) {
-            const encoder = new TextEncoder();
-            const keyData = encoder.encode(secret);
-            const dataBuffer = encoder.encode(data);
-            const cryptoKey = await crypto.subtle.importKey('raw', keyData, { name: 'HMAC', hash: 'SHA-1' }, false, ['sign']);
-            const signature = await crypto.subtle.sign('HMAC', cryptoKey, dataBuffer);
-            return btoa(String.fromCharCode(...new Uint8Array(signature)));
-        }
-        
-        // 鐢熸垚璁璁よ瘉澶撮儴
-        async function getXunfeiHeaders() {
-            const ts = Math.floor(Date.now() / 1000);
-            const signStr = XUNFEI_API_KEY + ts;
-            const signature = await hmacSha1(XUNFEI_API_SECRET, signStr);
-            return {
-                'X-Appid': XUNFEI_APP_ID,
-                'X-CurTime': ts.toString(),
-                'X-Param': btoa(JSON.stringify({ aue: 'raw', authid: XUNFEI_APP_ID, result_type: 'complete', version: 'v2' })),
-                'X-Signature': signature
-            };
-        }
-        
-        // 褰曢煶骞惰瘑鍒?        let mediaRecorder = null;
+        let isRecording = false;
+        let mediaRecorder = null;
         let audioChunks = [];
         
         async function startRecording() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 audioChunks = [];
-                mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/pcm' });
                 
+                // 优先使用PCM格式
+                let mimeType = 'audio/pcm';
+                if (!MediaRecorder.isTypeSupported(mimeType)) {
+                    mimeType = 'audio/webm;codecs=pcm';
+                }
+                if (!MediaRecorder.isTypeSupported(mimeType)) {
+                    mimeType = 'audio/webm';
+                }
+                
+                mediaRecorder = new MediaRecorder(stream, { mimeType: mimeType });
+
                 mediaRecorder.ondataavailable = async (e) => {
                     if (e.data.size > 0) {
                         audioChunks.push(e.data);
@@ -208,17 +192,25 @@
                 mediaRecorder.onstop = async () => {
                     const audioBlob = new Blob(audioChunks, { type: 'audio/pcm' });
                     const arrayBuffer = await audioBlob.arrayBuffer();
-                    const base64Audio = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+                    
+                    // 转换成UInt8Array然后转base64
+                    const uint8Array = new Uint8Array(arrayBuffer);
+                    let binary = '';
+                    for (let i = 0; i < uint8Array.byteLength; i++) {
+                        binary += String.fromCharCode(uint8Array[i]);
+                    }
+                    const base64Audio = btoa(binary);
+                    
                     await sendToBackend(base64Audio);
                 };
                 
                 mediaRecorder.start();
                 isRecording = true;
                 micBtn.classList.add('recording');
-                status.textContent = '馃帣锔?姝ｅ湪褰曢煶...';
+                status.textContent = '🔴 正在录音...';
                 status.classList.add('recording');
             } catch (err) {
-                status.textContent = '褰曢煶澶辫触: ' + err.message;
+                status.textContent = '录音失败: ' + err.message;
             }
         }
         
@@ -227,14 +219,14 @@
                 mediaRecorder.stop();
                 isRecording = false;
                 micBtn.classList.remove('recording');
-                status.textContent = '璇嗗埆涓?..';
+                status.textContent = '识别中...';
                 status.classList.remove('recording');
             }
         }
         
         async function sendToBackend(base64Audio) {
             try {
-                const response = await fetch('http://localhost:8080/api/recognize', {
+                const response = await fetch(API_BASE + '/api/recognize', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ audio: base64Audio })
@@ -242,16 +234,15 @@
                 const data = await response.json();
                 if (data.result) {
                     result.value = data.result;
-                    status.textContent = '鉁?璇嗗埆瀹屾垚';
+                    status.textContent = '✓ 识别完成';
                 } else {
-                    status.textContent = '璇嗗埆澶辫触锛岃閲嶈瘯';
+                    status.textContent = '识别失败，请重试';
                 }
             } catch (e) {
-                status.textContent = '璇嗗埆鍑洪敊: ' + e.message;
+                status.textContent = '请求出错: ' + e.message;
             }
         }
         
-        // 鎸変綇璇磋瘽
         micBtn.addEventListener('mousedown', () => {
             startRecording();
         });
@@ -264,7 +255,6 @@
             if (isRecording) stopRecording();
         });
         
-        // 瑙︽懜鏀寔
         micBtn.addEventListener('touchstart', (e) => {
             e.preventDefault();
             startRecording();
@@ -275,44 +265,43 @@
             stopRecording();
         });
         
-        info.textContent = '璇嗗埆寮曟搸: 璁璇煶API';
-        
+        info.textContent = '识别引擎: 百度语音识别API';
         
         function copyText() {
             if (result.value) {
                 navigator.clipboard.writeText(result.value);
-                status.textContent = '鉁?宸插鍒?;
+                status.textContent = '✓ 已复制';
                 setTimeout(() => {
-                    status.textContent = '鍑嗗灏辩华';
+                    status.textContent = '准备就绪';
                 }, 1500);
             }
         }
         
         function clearText() {
             result.value = '';
-            status.textContent = '宸叉竻绌?;
+            status.textContent = '已清空';
             setTimeout(() => {
-                status.textContent = '鍑嗗灏辩华';
+                status.textContent = '准备就绪';
             }, 1500);
         }
         
         async function improveWithAI() {
             if (!result.value.trim()) {
-                status.textContent = '璇峰厛杈撳叆鏂囧瓧';
+                status.textContent = '请先输入文字';
                 return;
             }
-            status.textContent = '馃 AI澶勭悊涓?..';
+            status.textContent = '🤖 AI处理中...';
             try {
-                const response = await fetch('http://localhost:8080/api/improve', {
+                const response = await fetch(API_BASE + '/api/improve', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ text: result.value })
                 });
                 const data = await response.json();
-                result.value = data.result || data.error || '浼樺寲澶辫触';
-                status.textContent = '鉁?AI浼樺寲瀹屾垚';
+                result.value = data.result || data.error || '优化失败';
+                status.textContent = '✓ AI优化完成';
             } catch (e) {
-                status.textContent = '璇锋眰澶辫触: ' + e.message;
+                status.textContent = '请求失败: ' + e.message;
             }
         }
     </script>
