@@ -31,7 +31,7 @@ public class SpeechService {
             throw new Exception("无法获取百度token");
         }
 
-        String url = "https://vop.baidu.com/server_api?token=" + token + "&cuid=voiceinput&dev_pid=15372";
+        String url = "https://vop.baidu.com/server_api?token=" + token + "&cuid=voiceinput";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -40,7 +40,7 @@ public class SpeechService {
         int speechLen = audioBytes.length;
 
         String jsonBody = String.format(
-            "{\"speech\":\"%s\",\"len\":%d,\"format\":\"wav\",\"rate\":16000,\"channel\":1,\"dev_pid\":15372,\"cuid\":\"voiceinput\"}",
+            "{\"speech\":\"%s\",\"len\":%d,\"format\":\"wav\",\"rate\":16000,\"channel\":1,\"dev_pid\":1537,\"cuid\":\"voiceinput\"}",
             base64Audio, speechLen
         );
 
