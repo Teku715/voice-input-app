@@ -32,12 +32,12 @@ public class SpeechService {
 
         String base64Audio = Base64.getEncoder().encodeToString(audioBytes);
 
-        // 百度支持的格式: pcm, wav, aiff, amr, mmf, ogg, m4a
-        // format 必须是百度支持的格式之一
-        String baiduFormat = "ogg".equals(format) ? "ogg" : "wav";
+        // 百度支持的格式: pcm(16k/8k), wav(16k/8k), aiff, amr, mmf, ogg, m4a, opu
+        // webm/opus格式用opu
+        String baiduFormat = "ogg".equals(format) ? "ogg" : "opu";
 
         String jsonBody = String.format(
-            "{\"speech\":\"%s\",\"len\":%d,\"format\":\"%s\",\"rate\":16000,\"channel\":1,\"cuid\":\"voiceinput\",\"dev_pid\":1537}",
+            "{\"speech\":\"%s\",\"len\":%d,\"format\":\"%s\",\"rate\":16000,\"channel\":1,\"cuid\":\"vi001\"}",
             base64Audio, audioBytes.length, baiduFormat
         );
 

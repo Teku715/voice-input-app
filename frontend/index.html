@@ -48,16 +48,16 @@
 </head>
 <body>
     <div class="container">
-        <h1>ð» 语音输入法</h1>
-        <textarea class="text-area" id="result" placeholder="ç³»æŒ‰æŒ¬éžæŒ‰é'±å¼€å§‹è¯´è¯�..."></textarea>
-        <button class="mic-btn" id="micBtn" title="ç³»æŒ‰è¯´è¯">ð«</button>
-        <div class="status" id="status">å‡†å¤‡å°±ç»ªï¼Œç‚¹å‡»æŒ¬é'±å¼€å§‹è¯´è¯±</div>
+        <h1>&#127911; 语音输入法</h1>
+        <textarea class="text-area" id="result" placeholder="按住按钮开始说话..."></textarea>
+        <button class="mic-btn" id="micBtn" title="按住说话">&#127908;</button>
+        <div class="status" id="status">准备就绪，点击按钮开始说话</div>
         <div class="actions">
-            <button class="btn btn-copy" onclick="copyText()">å¤夏å®Œ</button>
-            <button class="btn btn-clear" onclick="clearText()">æ¸…ç©º</button>
-            <button class="btn btn-ai" onclick="improveWithAI()">AIä¼˜åŒ–</button>
+            <button class="btn btn-copy" onclick="copyText()">复制</button>
+            <button class="btn btn-clear" onclick="clearText()">清空</button>
+            <button class="btn btn-ai" onclick="improveWithAI()">AI优化</button>
         </div>
-        <div class="info" id="info">è¯†åˆ«å¼•æ“Ž: ç™¾åº¦è¯­éŸ³è¯†åˆ«API</div>
+        <div class="info" id="info">识别引擎: 百度语音识别API</div>
     </div>
 
     <script>
@@ -74,10 +74,13 @@
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 audioChunks = [];
-                // 优先使用ogg格式（百度支持）
+                // ogg格式：百度支持，浏览器也支持
                 let mimeType = 'audio/ogg';
                 if (!MediaRecorder.isTypeSupported(mimeType)) {
-                    mimeType = 'audio/webm';
+                    mimeType = 'audio/webm;codecs=opus';
+                }
+                if (!MediaRecorder.isTypeSupported(mimeType)) {
+                    alert('浏览器不支持录音'); return;
                 }
                 mediaRecorder = new MediaRecorder(stream, { mimeType: mimeType });
                 mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
@@ -88,14 +91,15 @@
                     let binary = '';
                     for (let i = 0; i < uint8.byteLength; i++) binary += String.fromCharCode(uint8[i]);
                     const base64Audio = btoa(binary);
-                    await sendToBackend(base64Audio, mimeType);
+                    const format = mimeType.includes('ogg') ? 'ogg' : 'opus';
+                    await sendToBackend(base64Audio, format);
                 };
                 mediaRecorder.start();
                 isRecording = true;
                 micBtn.classList.add('recording');
-                status.textContent = 'ç·šä¸­...';
+                status.textContent = '&#128265; 录音中...';
                 status.classList.add('recording');
-            } catch (err) { status.textContent = 'å½±åƒå•å¤±è´¥: ' + err.message; }
+            } catch (err) { status.textContent = '录音失败: ' + err.message; }
         }
 
         function stopRecording() {
@@ -103,23 +107,22 @@
                 mediaRecorder.stop();
                 isRecording = false;
                 micBtn.classList.remove('recording');
-                status.textContent = 'è¯†åˆ«ä¸­...';
+                status.textContent = '&#128266; 识别中...';
                 status.classList.remove('recording');
             }
         }
 
-        async function sendToBackend(base64Audio, mimeType) {
+        async function sendToBackend(base64Audio, format) {
             try {
-                const format = mimeType.includes('ogg') ? 'ogg' : 'webm';
                 const response = await fetch(API_BASE + '/api/recognize', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ audio: base64Audio, format: format })
                 });
                 const data = await response.json();
-                result.value = data.result || data.error || 'è¯†åˆ«å¤±è´¥';
-                status.textContent = data.result ? 'å®Œæˆ' : 'å¤±è´¥';
-            } catch (e) { status.textContent = 'è¯·æ±‚å¤±è´¥: ' + e.message; }
+                result.value = data.result || data.error || '识别失败';
+                status.textContent = data.result ? '&#10004; 识别完成' : '&#10008; 识别失败';
+            } catch (e) { status.textContent = '请求失败: ' + e.message; }
         }
 
         micBtn.addEventListener('mousedown', () => startRecording());
@@ -127,15 +130,14 @@
         micBtn.addEventListener('mouseleave', () => { if (isRecording) stopRecording(); });
         micBtn.addEventListener('touchstart', e => { e.preventDefault(); startRecording(); });
         micBtn.addEventListener('touchend', e => { e.preventDefault(); stopRecording(); });
-        info.textContent = 'è¯†åˆ«å¼•æ“Ž: ç™¾åº¦è¯­éŸ³è¯†åˆ«API';
 
         function copyText() {
-            if (result.value) { navigator.clipboard.writeText(result.value); status.textContent = 'å·²å¤åˆ¶'; }
+            if (result.value) { navigator.clipboard.writeText(result.value); status.textContent = '&#10004; 已复制'; }
         }
-        function clearText() { result.value = ''; status.textContent = 'å·²æ¸…ç©º'; }
+        function clearText() { result.value = ''; status.textContent = '&#10004; 已清空'; }
         async function improveWithAI() {
-            if (!result.value.trim()) { status.textContent = 'è¯·å…光å…ˆè¾“å…¥æ–‡å­—'; return; }
-            status.textContent = 'AIå¤„ç†ä¸­...';
+            if (!result.value.trim()) { status.textContent = '请先输入文字'; return; }
+            status.textContent = '&#129488; AI处理中...';
             try {
                 const resp = await fetch(API_BASE + '/api/improve', {
                     method: 'POST',
@@ -143,9 +145,9 @@
                     body: JSON.stringify({ text: result.value })
                 });
                 const data = await resp.json();
-                result.value = data.result || 'ä¼˜åŒ–å¤±è´¥';
-                status.textContent = 'AIå®Œæˆ';
-            } catch (e) { status.textContent = 'AIå¤±è´¥: ' + e.message; }
+                result.value = data.result || '优化失败';
+                status.textContent = '&#10004; AI优化完成';
+            } catch (e) { status.textContent = 'AI失败: ' + e.message; }
         }
     </script>
 </body>
