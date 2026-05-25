@@ -5,3 +5,8 @@ silicon:
   api:
     key: ${SILICON_API_KEY:sk-ffzpunutxfeipjuhabhlqhwfngabcqrcqowgxacnjkknttqm}
     url: ${SILICON_API_URL:https://api.siliconflow.cn/v1/chat/completions}
+
+baidu:
+  appid: ${BAIDU_APPID:123439641}
+  apikey: ${BAIDU_APIKEY:HPKPOKEY0KKJzupj7Nx0N9Di}
+  secretkey: ${BAIDU_SECRETKEY:hr9XWQfoeA6sB2x5uGkGdxcgsemKL7Xg}
