@@ -87,7 +87,7 @@ AI 文本优化接口
 
 ## 视频演示
 
-- [百度网盘视频演示](https://pan.baidu.com/s/1jwP1ykKs288tezgUbtiKVw)（提取码: x9v3）
+- [百度网盘视频演示](https://pan.baidu.com/s/1SI6Wyo9lgXio-iY-GEFyvw)（提取码: 3r15）
 
 ## 作者
 
